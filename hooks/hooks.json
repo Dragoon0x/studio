@@ -1,0 +1,4 @@
+{
+  "_comment": "hooks runtime ships in session 2. this file is a placeholder so plugin loading does not fail.",
+  "hooks": []
+}
