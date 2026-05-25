@@ -112,7 +112,13 @@ issues and PRs welcome at github.com/Dragoon0x/studio.
 
 ## author
 
-Dragoon0x.
+[Dragoon0x](https://github.com/Dragoon0x) — [0xdragoon.xyz](https://0xdragoon.xyz/).
+
+## contributors
+
+- [Dragoon0x](https://github.com/Dragoon0x) — creator, maintainer.
+
+PRs welcome. see [github.com/Dragoon0x/studio](https://github.com/Dragoon0x/studio) — full contributor list lives on the GitHub [contributors page](https://github.com/Dragoon0x/studio/graphs/contributors).
 
 ---
 

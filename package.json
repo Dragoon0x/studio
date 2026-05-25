@@ -18,7 +18,20 @@
     "ai-agents",
     "mcp"
   ],
-  "author": "Dragoon0x",
+  "author": {
+    "name": "Dragoon0x",
+    "url": "https://github.com/Dragoon0x"
+  },
+  "contributors": [
+    {
+      "name": "Dragoon0x",
+      "url": "https://github.com/Dragoon0x"
+    }
+  ],
+  "homepage": "https://github.com/Dragoon0x/studio",
+  "bugs": {
+    "url": "https://github.com/Dragoon0x/studio/issues"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
