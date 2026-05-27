@@ -575,6 +575,22 @@ section('log viewer');
 }
 
 // ============================================================
+// 16. safety-guard: DYOR + contributor metadata didn't regress
+// ============================================================
+section('safety guard');
+
+{
+  const r = spawnSync('node', [path.join(ROOT, 'scripts/util/safety-guard.js')], {
+    encoding: 'utf-8',
+  });
+  if (r.status === 0) {
+    ok('safety-guard: README DYOR footer, hardened DISCLAIMER, package.json author/contributors all present');
+  } else {
+    err('safety-guard', `status=${r.status}\n${r.stdout}${r.stderr}`);
+  }
+}
+
+// ============================================================
 // summary
 // ============================================================
 console.log(`\n\x1b[1msummary\x1b[0m`);
