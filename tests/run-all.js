@@ -501,6 +501,80 @@ for (const doc of ['README.md', 'STUDIO.md', 'SOUL.md', 'DISCLAIMER.md', 'LICENS
 }
 
 // ============================================================
+// 13. reference integrity (drift guard)
+// ============================================================
+section('reference integrity');
+
+{
+  const r = spawnSync('node', [path.join(ROOT, 'scripts/util/check-references.js'), '--strict'], { encoding: 'utf-8' });
+  if (r.status === 0) {
+    ok('check-references: zero errors and warnings');
+  } else {
+    err('check-references', `found broken refs:\n${r.stdout}`);
+  }
+}
+
+// ============================================================
+// 14. dashboard build runs cleanly
+// ============================================================
+section('dashboard build');
+
+{
+  const tmpOut = '/tmp/studio-dashboard-test-' + Date.now();
+  const r = spawnSync('node', [path.join(ROOT, 'scripts/dashboard/build.js'), '--out', tmpOut], { encoding: 'utf-8' });
+  if (r.status === 0) {
+    ok('build.js: exits clean');
+    if (fs.existsSync(path.join(tmpOut, 'index.html'))) ok('build.js: writes index.html');
+    else err('build.js index.html', 'missing');
+    if (fs.existsSync(path.join(tmpOut, '.nojekyll'))) ok('build.js: writes .nojekyll');
+    else err('build.js .nojekyll', 'missing');
+    const html = fs.readFileSync(path.join(tmpOut, 'index.html'), 'utf-8');
+    // verify generated HTML doesn't contain unsubstituted server-side template vars
+    // (${escapeHtml(...)} inside <script> is legitimate JS template literal usage, not server-side)
+    const serverSidePatterns = ['${STUDIO_ROOT}', '${VERSION}', '${COUNT}'];
+    const hasUnsubstituted = serverSidePatterns.some((p) => html.includes(p));
+    if (!hasUnsubstituted) {
+      ok('build.js: no unsubstituted server-side template vars');
+    } else {
+      err('build.js template vars', `found one of: ${serverSidePatterns.join(', ')}`);
+    }
+    if (html.includes('<!doctype html>')) ok('build.js: valid doctype');
+    else err('build.js doctype', 'missing');
+    // cleanup
+    fs.rmSync(tmpOut, { recursive: true, force: true });
+  } else {
+    err('build.js exit', `status=${r.status}, stderr=${r.stderr}`);
+  }
+}
+
+// ============================================================
+// 15. log-viewer runs cleanly
+// ============================================================
+section('log viewer');
+
+{
+  const tmpLog = '/tmp/studio-log-viewer-test-' + Date.now();
+  fs.mkdirSync(tmpLog, { recursive: true });
+  // log-viewer should handle empty log dir gracefully
+  const r = spawnSync('node', [path.join(ROOT, 'scripts/dashboard/log-viewer.js')], {
+    encoding: 'utf-8',
+    env: { ...process.env, STUDIO_LOG_DIR: tmpLog },
+  });
+  if (r.status === 0 && r.stdout.includes('no activations')) ok('log-viewer: handles empty dir');
+  else err('log-viewer empty', `status=${r.status}, stdout=${r.stdout}`);
+
+  // log-viewer --help
+  const r2 = spawnSync('node', [path.join(ROOT, 'scripts/dashboard/log-viewer.js'), '--help'], {
+    encoding: 'utf-8',
+    env: { ...process.env, STUDIO_LOG_DIR: tmpLog },
+  });
+  if (r2.status === 0 && r2.stdout.includes('STUDIO log viewer')) ok('log-viewer: --help works');
+  else err('log-viewer --help', `status=${r2.status}`);
+
+  fs.rmSync(tmpLog, { recursive: true, force: true });
+}
+
+// ============================================================
 // summary
 // ============================================================
 console.log(`\n\x1b[1msummary\x1b[0m`);

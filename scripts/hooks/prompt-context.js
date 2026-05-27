@@ -62,6 +62,15 @@ const KEYWORDS = {
   'case study': ['skills/case-study-writing/SKILL.md'],
   'release notes': ['skills/release-narrative/SKILL.md'],
   'changelog': ['skills/release-narrative/SKILL.md'],
+  'brand identity': ['skills/brand-identity-audit/SKILL.md'],
+  'brand audit': ['skills/brand-identity-audit/SKILL.md'],
+  'content calendar': ['skills/content-calendar/SKILL.md'],
+  'editorial calendar': ['skills/content-calendar/SKILL.md'],
+  'content plan': ['skills/content-calendar/SKILL.md'],
+  'email sequence': ['skills/email-sequence/SKILL.md'],
+  'drip campaign': ['skills/email-sequence/SKILL.md'],
+  'welcome series': ['skills/email-sequence/SKILL.md'],
+  'onboarding email': ['skills/email-sequence/SKILL.md'],
 };
 
 function findStudioRoot() {
@@ -90,6 +99,32 @@ function readRelative(root, relPath) {
   }
 }
 
+function getLogDir() {
+  if (process.env.STUDIO_LOG_DIR) return process.env.STUDIO_LOG_DIR;
+  return path.join(os.homedir(), '.claude', 'studio', 'logs');
+}
+
+function logActivation(prompt, matchedKeywords, refs) {
+  try {
+    const dir = getLogDir();
+    fs.mkdirSync(dir, { recursive: true });
+    const today = new Date().toISOString().slice(0, 10);
+    const logFile = path.join(dir, `activations-${today}.log`);
+    const ts = new Date().toISOString();
+    // truncate prompt to keep log entries reasonable
+    const promptSnippet = prompt.length > 200 ? prompt.slice(0, 200) + '...' : prompt;
+    const line = JSON.stringify({
+      ts,
+      keywords: matchedKeywords,
+      refs,
+      prompt: promptSnippet,
+    }) + '\n';
+    fs.appendFileSync(logFile, line);
+  } catch (e) {
+    // never let logging break anything
+  }
+}
+
 function main() {
   const input = readHookInput();
   if (!input) {
@@ -100,8 +135,10 @@ function main() {
   if (!prompt) process.exit(0);
 
   const matched = new Set();
+  const matchedKeywords = [];
   for (const [kw, refs] of Object.entries(KEYWORDS)) {
     if (prompt.includes(kw)) {
+      matchedKeywords.push(kw);
       for (const r of refs) matched.add(r);
     }
   }
@@ -125,6 +162,7 @@ function main() {
     // too noisy, skip context injection (but still load instincts if present)
     if (!hasInstincts) process.exit(0);
     matched.clear();
+    matchedKeywords.length = 0;
   }
 
   const blocks = [];
@@ -141,6 +179,12 @@ function main() {
   }
 
   if (blocks.length === 0) process.exit(0);
+
+  // log this activation for later analysis
+  const surfacedRefs = [];
+  if (hasInstincts) surfacedRefs.push(instinctsRel);
+  for (const r of matched) surfacedRefs.push(r);
+  logActivation(prompt, matchedKeywords, surfacedRefs);
 
   const payload = {
     continue: true,

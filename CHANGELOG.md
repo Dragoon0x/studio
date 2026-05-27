@@ -1,5 +1,54 @@
 # changelog
 
+## 0.3.0 — session 3
+
+### added
+
+- **dashboard ui** (`scripts/dashboard/build.js`) — generates a static HTML site at `docs/` indexing every agent, skill, command, and rule. browseable, searchable, filterable by type and lane. clicking a card opens the full source body. designed for github pages (includes `.nojekyll`).
+  - run: `node scripts/dashboard/build.js` or `npm run dashboard`
+  - `--out <path>` for custom output dir
+  - `--watch` for poll-based rebuild on change
+- **skill activation log** — the `prompt-context` hook now writes one JSON line per activation to `~/.claude/studio/logs/activations-YYYY-MM-DD.log`. records timestamp, matched keywords, refs surfaced, and a truncated prompt snippet.
+- **log viewer cli** (`scripts/dashboard/log-viewer.js`) — inspects both activation and write logs.
+  - default: today's activations
+  - `--writes` show write log
+  - `--date YYYY-MM-DD` specific day
+  - `--last N` last N days
+  - `--top` most-activated keywords and refs across the period
+- **drift guard** (`scripts/util/check-references.js`) — scans for broken cross-references.
+  - prompt-context keyword refs pointing at nonexistent files
+  - commands invoking nonexistent skills
+  - skill `## related` sections naming things that don't exist
+  - agent files referencing nonexistent skills
+  - missing memory files
+  - orphan skills (informational; skills no command/agent/hook references)
+  - integrated into `tests/run-all.js`
+  - run standalone: `node scripts/util/check-references.js` or `npm run check-refs`
+- **3 new skills** to bring total to 33:
+  - `brand-identity-audit` — full identity audit across logo, type, color, voice, imagery, motion
+  - `content-calendar` — content plan tied to goals, audiences, channels, owners
+  - `email-sequence` — multi-email sequences for onboarding, nurture, sales, lifecycle, launch
+- **3 new commands** to bring total to 29:
+  - `/brand-identity`, `/content-calendar`, `/email-sequence`
+- **keywords map extended** in `prompt-context.js` to recognize new skills (brand identity, content calendar, drip campaign, welcome series, etc.)
+
+### bugs caught and fixed during s3 build
+
+- `scripts/util/check-references.js` initial regex `^## related` matched `^## related components` (substring), and the 1500-char window pulled bullets from unrelated sections like `## what to avoid`. fixed by requiring exact heading match and bounding the block at the next heading.
+
+### tested
+
+- 339 tests pass (the s2 suite of 314 + 25 new checks for reference integrity, dashboard build, log viewer)
+- drift guard verified by injecting two real broken refs (renamed skill, fake `## related` entry) and confirming the scanner caught both, then cleaning up.
+- dashboard generation tested: 100 items indexed, JSON data block parses clean, valid HTML5 with proper doctype.
+- log viewer tested across all modes (default, --writes, --top, --help, empty log dir).
+
+### scope honesty
+
+s3 adds the operator-facing surface: dashboard, logs, drift guards. it does not yet include a public docs site, dark-mode toggle on the dashboard, or live-reload on watch (uses 2s polling). those are session 4 work if there's demand.
+
+---
+
 ## 0.2.0 — session 2
 
 ### added
@@ -54,21 +103,13 @@ s2 ships the hooks and adapters. it does not include a dashboard, no docs site, 
 
 ## planned
 
-### 0.3.0 — session 3
-
-- dashboard ui (browse skills, agents, commands, rules visually)
-- skill activation log (which skill ran, when, on what)
-- drift guards (changes to rules emit warnings when they affect downstream skills)
-- expanded skill set: brand identity audit, content calendar, email sequence
-
 ### 0.4.0 — session 4
 
-- docs site (github pages)
-- public launch
-- contribution guide
-- skill authoring template
+- public docs site (github pages or hosted)
+- npm package as runnable cli (`npx studio-universal <command>`)
+- contribution guide and skill authoring template
 
 ### 0.5.0 — session 5
 
-- npm package as runnable cli (`npx studio <command>`)
 - github app for repo-level integration (if there's traction)
+- skill marketplace (third-party authoring)

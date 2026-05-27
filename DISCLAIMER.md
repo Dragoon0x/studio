@@ -2,7 +2,7 @@
 
 ## status
 
-STUDIO is **experimental, early-stage software**. it is published as an open source scaffold for design, product and brand work inside ai coding agents. interfaces, agent contracts, skill descriptions, rule formats, hook signatures, adapter layouts, install scripts, and file layout may change between sessions without notice and without migration paths.
+STUDIO is **experimental, early-stage software**. it is published as an open source scaffold for design, product and brand work inside ai coding agents. interfaces, agent contracts, skill descriptions, rule formats, hook signatures, adapter layouts, dashboard scripts, install scripts, and file layout may change between sessions without notice and without migration paths.
 
 do not assume STUDIO is stable, complete, secure, or production-ready. it is a work in progress.
 
@@ -10,11 +10,11 @@ do not assume STUDIO is stable, complete, secure, or production-ready. it is a w
 
 before installing or relying on any part of STUDIO:
 
-- read the agents, skills, rules, and hooks you intend to use. they encode opinions, not facts, and the hooks execute on your machine.
+- read the agents, skills, rules, hooks, and dashboard scripts you intend to use. they encode opinions, not facts, and they execute on your machine.
 - review every output before shipping it. agents will hallucinate, miscount, misquote, and misjudge.
-- validate generated copy, prds, audits, scopes, names, and recommendations against your own context, audience, and obligations.
+- validate generated copy, prds, audits, scopes, names, brand identities, content calendars, email sequences, and recommendations against your own context, audience, and obligations.
 - treat anything STUDIO produces as a draft, not a deliverable.
-- audit every adapter's `install.sh` and the scripts under `scripts/hooks/` before running them — they modify your harness config and write to your home directory.
+- audit every adapter's `install.sh`, the scripts under `scripts/hooks/`, and the scripts under `scripts/dashboard/` before running them — they modify your harness config, read prompts, and write to your home directory.
 
 if you are not willing to review what STUDIO produces, do not ship what STUDIO produces.
 
@@ -28,10 +28,10 @@ see [LICENSE](LICENSE) for the full MIT terms.
 
 ## not professional advice
 
-nothing in STUDIO constitutes legal, financial, medical, security, privacy, accessibility-compliance, employment, or any other professional advice. in particular:
+nothing in STUDIO constitutes legal, financial, medical, security, privacy, accessibility-compliance, employment, marketing, or any other professional advice. in particular:
 
 - the accessibility-reviewer agent and accessibility-audit skill do not replace WCAG-qualified review or formal compliance certification.
-- the brand-voice-keeper agent and copy/messaging skills do not replace trademark, advertising-law, or regulatory review.
+- the brand-voice-keeper agent, brand-identity-audit, copy, messaging, content-calendar, and email-sequence skills do not replace trademark, advertising-law, anti-spam (CAN-SPAM / GDPR / CASL), or regulatory review.
 - the product-strategist agent and prd/spec skills do not replace legal, privacy, or security review of features.
 - nothing here is investment, trading, token, or other financial advice.
 
@@ -45,8 +45,8 @@ the operator is responsible for:
 
 - the accuracy, originality, and legality of generated output
 - the appropriateness of generated output for its audience and channel
-- compliance with applicable laws, regulations, contracts, and platform terms
-- security review of any code, configs, hooks, or scripts before execution
+- compliance with applicable laws, regulations, contracts, and platform terms (including anti-spam and consent requirements for email sequences and outreach)
+- security review of any code, configs, hooks, dashboard scripts, or installers before execution
 - protection of confidential or personal data fed into agents, skills, hooks, or mcp servers
 
 STUDIO has opinions. the operator has context. when they conflict, the operator's context wins, and the operator carries the consequences.
@@ -55,7 +55,7 @@ STUDIO has opinions. the operator has context. when they conflict, the operator'
 
 STUDIO is **not affiliated with, endorsed by, or sponsored by** Anthropic, Cursor, OpenAI, Google, Zed Industries, GitHub/Microsoft, Figma, Notion, Linear, PostHog, or any other company, product, or service referenced anywhere in this repository. all trademarks, service marks, product names, and company names are the property of their respective owners and are used here for identification only.
 
-STUDIO integrates with public APIs where applicable. references to third-party products in agents, skills, adapters, examples, or mcp-configs do not imply any partnership, certification, or approval by those companies.
+STUDIO integrates with public APIs where applicable. references to third-party products in agents, skills, adapters, examples, docs, or mcp-configs do not imply any partnership, certification, or approval by those companies.
 
 ## third-party content
 
@@ -63,11 +63,11 @@ agents, skills, and rules may reference public concepts, frameworks, or conventi
 
 ## security
 
-STUDIO ships configuration files, install scripts, hook scripts, and mcp configs. **audit them before running on a machine you care about.** the author is not responsible for changes installers or hooks make to your local environment, harness configuration, shell, or filesystem.
+STUDIO ships configuration files, install scripts, hook scripts, dashboard scripts, and mcp configs. **audit them before running on a machine you care about.** the author is not responsible for changes installers, hooks, or dashboard scripts make to your local environment, harness configuration, shell, or filesystem.
 
-the `prompt-context.js` hook reads your prompts. the `post-write.js` hook writes log files under `~/.claude/studio/logs/`. adapter install scripts copy or symlink files into other harnesses' config directories. understand these effects before enabling them.
+the `prompt-context.js` hook reads your prompts. the `post-write.js` hook writes log files under `~/.claude/studio/logs/`. the dashboard build and log-viewer scripts read those logs and emit static html. adapter install scripts copy or symlink files into other harnesses' config directories. understand these effects before enabling them.
 
-do not feed secrets, credentials, customer data, or other confidential information into agents, skills, hooks, or any connected mcp servers unless you have independently verified that your harness, model provider, and the relevant mcp servers handle that data appropriately for your threat model.
+do not feed secrets, credentials, customer data, or other confidential information into agents, skills, hooks, dashboard scripts, or any connected mcp servers unless you have independently verified that your harness, model provider, and the relevant mcp servers handle that data appropriately for your threat model.
 
 ## changes
 

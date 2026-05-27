@@ -6,16 +6,20 @@ agents, skills, hooks, rules and commands for ai coding agents like claude code,
 
 ```
 studio/
-├── agents/         15 specialist agents
-├── skills/         30 skills across design, product, brand
-├── commands/       26 slash commands
-├── rules/          23 rules across 5 lanes
-├── hooks/          working claude code hooks (pre-write, post-write, prompt-context)
-├── mcp-configs/    figma, notion, linear, posthog, filesystem
-├── memory/         operator instincts, lessons, decisions, glossary
-├── adapters/       cursor, codex, opencode, gemini, zed, vscode
-├── scripts/hooks/  hook runtime (node, executable)
-└── tests/          run-all.js validator
+├── agents/           15 specialist agents
+├── skills/           33 skills across design, product, brand
+├── commands/         29 slash commands
+├── rules/            23 rules across 5 lanes
+├── hooks/            working claude code hooks (pre-write, post-write, prompt-context)
+├── mcp-configs/      figma, notion, linear, posthog, filesystem
+├── memory/           operator instincts, lessons, decisions, glossary
+├── adapters/         cursor, codex, opencode, gemini, zed, vscode
+├── scripts/
+│   ├── hooks/        hook runtime (node, executable)
+│   ├── dashboard/    build.js (static html), log-viewer.js (cli)
+│   └── util/         check-references.js (drift guard)
+├── docs/             generated static dashboard (github pages ready)
+└── tests/            run-all.js validator
 ```
 
 ## quick install (claude code)
@@ -26,7 +30,7 @@ cd ~/.claude/studio
 ./install.sh
 ```
 
-the installer registers the plugin, writes the hooks config into `~/.claude/settings.json` with absolute paths, and installs the mcp templates.
+the installer links the plugin, writes the hooks config into `~/.claude/settings.json` with absolute paths, and copies the mcp templates.
 
 ## what's in here
 
@@ -34,23 +38,23 @@ the installer registers the plugin, writes the hooks config into `~/.claude/sett
 
 design-reviewer, design-system-auditor, accessibility-reviewer, brand-voice-keeper, copywriter, microcopy-writer, product-strategist, ux-research-synthesizer, competitor-analyst, naming-generator, narrative-architect, taxonomy-architect, release-narrator, case-study-writer, pitch-deck-writer.
 
-### skills (30)
+### skills (33)
 
 **design (10)**: design-review, design-system-audit, accessibility-audit, figma-handoff-spec, component-spec, motion-direction, responsive-rules, dark-mode-pairing, iconography-system, data-viz-design.
 
 **product (10)**: prd-writing, spec-writing, research-synthesis, jtbd-framing, roadmap-planning, feature-scoping, metric-design, ab-test-design, competitive-analysis, launch-planning.
 
-**brand (10)**: brand-voice-extraction, naming-generation, tagline-writing, positioning-statement, messaging-architecture, value-prop-writing, microcopy-writing, landing-copy, case-study-writing, release-narrative.
+**brand (13)**: brand-voice-extraction, naming-generation, tagline-writing, positioning-statement, messaging-architecture, value-prop-writing, microcopy-writing, landing-copy, case-study-writing, release-narrative, brand-identity-audit, content-calendar, email-sequence.
 
-### commands (26)
+### commands (29)
 
 design: `/design-review`, `/a11y-scan`, `/system-audit`, `/handoff`
 product: `/prd`, `/spec`, `/research-synth`, `/jtbd`, `/roadmap`, `/scope`, `/metrics`, `/experiment`, `/competitor`, `/launch`
-brand: `/brand-check`, `/name`, `/copy-review`, `/voice-extract`, `/tagline`, `/position`, `/messaging`, `/value-prop`, `/microcopy`, `/landing`, `/case-study`, `/release`
+brand: `/brand-check`, `/name`, `/copy-review`, `/voice-extract`, `/tagline`, `/position`, `/messaging`, `/value-prop`, `/microcopy`, `/landing`, `/case-study`, `/release`, `/brand-identity`, `/content-calendar`, `/email-sequence`
 
 ### hooks (3)
 
-`pre-write` flags ai-tone and rhythm flatness before writes. `post-write` logs every write. `prompt-context` surfaces relevant skills based on prompt keywords. all non-blocking by default. set `STUDIO_HOOK_STRICT=1` to block on flags.
+`pre-write` flags ai-tone and rhythm flatness before writes. `post-write` logs every write. `prompt-context` surfaces relevant skills based on prompt keywords and logs each activation. all non-blocking by default. set `STUDIO_HOOK_STRICT=1` to block on flags.
 
 ### rules (23)
 
@@ -59,6 +63,38 @@ brand: `/brand-check`, `/name`, `/copy-review`, `/voice-extract`, `/tagline`, `/
 - product (5): prd-structure, jtbd, metrics, specs, research-standards
 - brand (5): voice, tone-matrix, banned-words, naming-conventions, messaging-hierarchy
 - copy (3): sentence-rhythm, anti-ai-tone, active-voice
+
+### dashboard
+
+a static HTML site browsing every agent, skill, command and rule. searchable, filterable by type and lane. click a card to open the full source.
+
+```bash
+npm run dashboard        # writes to docs/
+node scripts/dashboard/build.js --out custom-path
+node scripts/dashboard/build.js --watch
+```
+
+deploy: push to github, enable github pages serving from `docs/` on main.
+
+### log viewer
+
+inspect what STUDIO surfaced and what got written.
+
+```bash
+npm run logs                                    # today's activations
+node scripts/dashboard/log-viewer.js --top      # most-activated keywords
+node scripts/dashboard/log-viewer.js --writes   # write log
+node scripts/dashboard/log-viewer.js --last 7   # last 7 days
+```
+
+### drift guard
+
+scans for broken cross-references. runs as part of the test suite, also standalone.
+
+```bash
+npm run check-refs
+node scripts/util/check-references.js --strict   # exit 1 on findings
+```
 
 ### adapters (6)
 
@@ -98,10 +134,10 @@ windows:
 ## tests
 
 ```bash
-node tests/run-all.js
+npm test
 ```
 
-validates: JSON parsing, agent/skill/command frontmatter, hook execution on 8 edge cases, adapter install scripts, cross-references, and unit tests on the banned-word and rhythm checkers.
+validates: JSON parsing, agent/skill/command frontmatter, hook execution on 8 edge cases, adapter install scripts, cross-references, dashboard build, log-viewer cli, and unit tests on the banned-word and rhythm checkers. 339 checks.
 
 ## license
 
@@ -125,23 +161,23 @@ full contributor list lives on the GitHub [contributors page](https://github.com
 
 ## status: experimental — DYOR
 
-STUDIO is **early-stage, experimental software**. session 2 ships hooks, adapters, and 20 new commands; sessions 3–5 are unfinished. interfaces, agent contracts, skill descriptions, rule formats, hook signatures, adapter layouts, and install scripts may change without notice and without migration paths.
+STUDIO is **early-stage, experimental software**. session 3 ships a dashboard, log viewer, reference checker, three new skills/commands, and a docs page; sessions 4–5 are unfinished. interfaces, agent contracts, skill descriptions, rule formats, hook signatures, adapter layouts, dashboard scripts, and install scripts may change without notice and without migration paths.
 
 **do your own research (DYOR)** before relying on STUDIO for anything that matters:
 
-- read every agent, skill, rule, and hook before running them. they encode opinions and they execute on your machine.
+- read every agent, skill, rule, hook, and dashboard script before running them. they encode opinions and they execute on your machine.
 - review every output before shipping it. agents and skills will be wrong sometimes.
-- validate generated copy, prds, audits, scopes, and recommendations against your own context, audience, and legal/compliance requirements.
+- validate generated copy, prds, audits, scopes, brand identities, content calendars, email sequences, and recommendations against your own context, audience, and legal/compliance requirements.
 - treat anything STUDIO produces as a draft, not a deliverable.
-- audit the hook scripts under `scripts/hooks/` and each adapter's `install.sh` before running them — they modify your harness config and write to your home directory.
+- audit the hook scripts under `scripts/hooks/`, dashboard scripts under `scripts/dashboard/`, and each adapter's `install.sh` before running them — they execute locally, read prompts, write logs, and modify your harness config.
 
 **no warranty.** STUDIO is provided "as is" under the MIT license. there is no guarantee of accuracy, originality, fitness for any purpose, security, or availability. the author and contributors accept no liability for losses, damages, missed deadlines, brand harm, leaked information, or any other consequence arising from use of this repo.
 
-**not professional advice.** nothing in STUDIO constitutes legal, financial, medical, security, accessibility-compliance, or other professional advice. accessibility audits, brand guidance, product specs, and copy reviews here are starting points — not substitutes for qualified review.
+**not professional advice.** nothing in STUDIO constitutes legal, financial, medical, security, accessibility-compliance, or other professional advice. accessibility audits, brand guidance, product specs, content calendars, email sequences, and copy reviews here are starting points — not substitutes for qualified review.
 
 **operator owns the output.** content generated through STUDIO via any harness (claude code, cursor, codex, opencode, gemini, zed, vscode, etc.) is the responsibility of the operator running the harness, not the author of STUDIO.
 
-**no affiliation.** STUDIO is not affiliated with, endorsed by, or sponsored by Anthropic, Cursor, OpenAI, Google, Zed Industries, GitHub/Microsoft, Figma, Notion, Linear, PostHog, or any other company referenced in agents, skills, adapters, or examples. all trademarks belong to their respective owners.
+**no affiliation.** STUDIO is not affiliated with, endorsed by, or sponsored by Anthropic, Cursor, OpenAI, Google, Zed Industries, GitHub/Microsoft, Figma, Notion, Linear, PostHog, or any other company referenced in agents, skills, adapters, examples, or docs. all trademarks belong to their respective owners.
 
 if any of this is a problem for your use case, do not install STUDIO. fork it, audit it, or wait for a stable release.
 
